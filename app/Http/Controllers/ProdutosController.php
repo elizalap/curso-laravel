@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Http\Requests\StoreUpdateProductRequest;
 use Illuminate\Http\Request;
 
 class ProdutosController extends Controller
 {
-    public function _construct(Request $request)
+    protected $request;
+    private $repository;
+
+    public function _construct(Request $request, Product $product)
     {
         $this->request = $request;
+        $this->repository = $product;
 
         //$this->middleware('auth');
         /*$this->middleware('auth')->only([
@@ -27,11 +32,10 @@ class ProdutosController extends Controller
      */
     public function index()
     {
-        $teste = 123;
-        $teste2 = 321;
-        $teste3 = [];
-        $products = ['Tv', 'Geladeira', 'Forno', 'Sofá'];
-        return view('admin.pages.products.index', compact('teste', 'teste2', 'teste3', 'products'));
+        $products = Product::paginate();
+        return view('admin.pages.products.index', [
+            'products' => $products,
+        ]);
     }
 
     /**
@@ -52,24 +56,11 @@ class ProdutosController extends Controller
      */
     public function store(StoreUpdateProductRequest $request)
     {
+        $data = $request->only('name', 'description', 'price');
 
-        /*
-        $request->validate([
-            'name' => 'required|min:3|max:255',
-            'description' => 'nullable|min:3|max:10000',
-            'photo' => 'required|image',
-        ]);
-        */
+        $this->repository->create($data);
 
-        // dd($request->all());
-        // dd($request->inly(['name','description']));
-        // dd($request->input('teste', 'default'));
-        // dd($request->except('_token', 'name'));
-
-        if ($request->file('photo')->isValid()) {
-            $nameFile = $request->name . '.' . $request->photo->extension();
-            dd($request->file('photo')->storeAs('products', $nameFile));
-        }
+        return redirect()->route('products.index');
     }
 
     /**
@@ -80,7 +71,15 @@ class ProdutosController extends Controller
      */
     public function show($id)
     {
-        return "Detalhes do produto {$id}";
+
+        //$product = Product::where('id', $id)->first();
+
+        if (!$product = Product::find($id))
+            return redirect()->back();
+
+        return view('admin.pages.products.show', [
+            'product' => $product
+        ]);
     }
 
     /**
@@ -114,6 +113,11 @@ class ProdutosController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = Product::where('id', $id)->first();
+        if (!$product)
+            return redirect()->back();
+        $product->delete();
+
+        return redirect()->route('products.index');
     }
 }
