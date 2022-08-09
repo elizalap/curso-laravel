@@ -58,7 +58,7 @@ class ProdutosController extends Controller
     {
         $data = $request->only('name', 'description', 'price');
 
-        $this->repository->create($data);
+        Product::create($data);
 
         return redirect()->route('products.index');
     }
@@ -99,11 +99,11 @@ class ProdutosController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Http\Requests\StoreUpdateProductRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreUpdateProductRequest $request, $id)
     {
         if (!$product = Product::find($id))
             return redirect()->back();
