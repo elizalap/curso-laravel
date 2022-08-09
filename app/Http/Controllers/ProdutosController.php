@@ -90,7 +90,10 @@ class ProdutosController extends Controller
      */
     public function edit($id)
     {
-        //
+        if (!$product = Product::find($id))
+            return redirect()->back();
+
+        return view('admin.pages.products.edit', compact('product'));
     }
 
     /**
@@ -102,7 +105,12 @@ class ProdutosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if (!$product = Product::find($id))
+            return redirect()->back();
+
+        $product->update($request->all());
+
+        return redirect()->route('products.index');
     }
 
     /**
